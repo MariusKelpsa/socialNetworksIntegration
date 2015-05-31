@@ -1,0 +1,231 @@
+<!-- Pirmasis/pagrindinis puslapis. 
+Esmė - nustatyti kurioje aplikacijoje esame, Facebook ar Vkontakte.
+Pagal tai kur reikia naudojamas požymis "socialNetwork". -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:fb="http://ogp.me/ns/fb#">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Testinė integracinė aplikacija</title>
+</head>
+<body>
+<!-- script'as reikalingas vkontake API naudojimui -->
+	<script src="http://vk.com/js/api/xd_connection.js?2" type="text/javascript"></script>
+	
+	<script src="/vk.js" type="text/javascript"></script>
+    <script src="/fb.js" type="text/javascript"></script>
+    <script src="/helper.js" type="text/javascript"></script>
+    
+<!-- Vkontakte prisijungimo mygtukas.- -->
+    <div id="vkLogin" onclick="VK.Auth.login(authInfo);"style="display: none"></div>
+<!-- Facebook prisijungimo mygtukas. Įdedamas į <div>, kad būtų galima paslėpt esant vkontakte. -->
+	<div id="fbLogin" style="display: none">
+		<fb:login-button scope="public_profile,email,user_friends,publish_actions"
+			data-auto-logout-link="true" onlogin="onLogin();">
+		</fb:login-button>
+	</div>
+<!-- ----------------------------------------------------------- -->
+	<center>
+		<H1>Testinė integracinė aplikacija</H1>
+		<P />
+
+		<BR />
+		<!-- Funkcijų pavyzdžiai kol kas atidaromi paspaudus nuorodą -->
+		<a id="myInfo">Jūsų profilio informacija</a><BR /> 
+		<a id="friendsInfo">Jūsų draugų informacija</a><BR /> 
+		<a href='#' onclick="postOnWall()">Pranešimo skelbimas ant sienos</a><BR /> 
+		<a href='#' onclick="inviteFriends();">Pakviesti draugų</a><BR /> 
+		<a href='#' onclick="getAchievements();">Gauti pasiekimų skaičių</a><BR /> 
+        <a href='#' onclick="postAchievement(achievement2);">Skirti pasiekimą</a><BR /> 
+        <a href='#' onclick="deleteAchievement(achievement2);">Ištrinti pasiekimą</a><BR /> 
+        <a href='#' onclick="setScore();">Nustatyti rezultatą</a><BR /> 
+        <a href='#' onclick="getScores();">Gauti rezultatus</a><BR /> 
+		<P />
+	</center>
+	
+<!--  -->
+<script language="javascript">
+	
+var socialNetwork = '';
+var fbAppId = '335319716662247';
+var vkAppId = '4817999';
+var fbApiVersion = 'v2.2';
+var iApi;
+
+var achievement1 = 'http://fbapp-mariusfbapp.rhcloud.com/ach.html';
+var achievement2 = 'http://fbapp-mariusfbapp.rhcloud.com/ach2.html';
+
+var myInfo = document.getElementById("myInfo");
+var friendsInfo = document.getElementById("friendsInfo");
+
+var fbLoginButton = document.getElementById("fbLogin");
+var vkLoginButton = document.getElementById("vkLogin");
+
+var strLink = "";
+
+/* ----------------------vkontakte-------------------- */
+/* jei VK turi reikšmę, tai scriptas esantis aukščiau pasikrovė sėkmingai ir tikriausiai esame vkontakte appse, todėl galim inicializuoti */
+if(typeof VK != 'undefined'){
+    function authInfo(response) {
+        if (response.session) {
+            /* kai url'e yra "vk.com" arba "vkontakte", tai esame vkontakte appse. Nėra/neradau analogo FB.Canvas.getPageInfo */
+            if ((document.referrer.indexOf("vk.com") != -1) || (document.referrer.indexOf("vkontakte") != -1)){
+                 vkLoginButton.style.display = "inline";
+                 fbLoginButton.style.display = "none";
+
+                 /* suformuojam link'us funkcijom su vkontakte parametru */
+                 socialNetwork = 'vkontakte';
+                 var args = {
+                     socialNetwork : socialNetwork
+                 };
+                 iApi = createApi(args);
+                 strLink = "myInfo.html?key=" + socialNetwork;
+                 myInfo.setAttribute("href",strLink);
+                 strLink = "friendsInfo.html?key=" + socialNetwork;
+                 friendsInfo.setAttribute("href",strLink);
+            }
+        } 
+    }
+
+    VK.init(
+	function(){
+        var response = {
+            session : true
+        };
+        authInfo(response);
+	});
+
+}
+
+//----------------------facebook--------------------
+/* prisijungimo bei puslapio užkrovimo metu kviečiama funkcija */
+function onLogin(){
+    /* jei esame FB.Canvas lange, tai gausime respons'ą ir žinosime, kad esame Facebook aplikacijoje */
+	FB.Canvas.getPageInfo(function(info) {
+		if(info){
+			fbLoginButton.style.display = "inline";
+			FB.getLoginStatus(function(response) {
+				if (response.status === 'connected'){
+					 /* suformuojam link'us funkcijom su vkontakte parametru */
+					socialNetwork = 'facebook';
+					var args = {
+                        socialNetwork : socialNetwork,
+                        appId : fbAppId,
+                        apiVersion : fbApiVersion
+					};
+					iApi = createApi(args);
+					strLink = "myInfo.html?key=" + socialNetwork + "&appId=" + fbAppId + "&apiV=" + fbApiVersion;
+					myInfo.setAttribute("href",strLink);
+					strLink = "friendsInfo.html?key=" + socialNetwork + "&appId=" + fbAppId + "&apiV=" + fbApiVersion;
+					friendsInfo.setAttribute("href",strLink);
+			    }
+			});
+		}
+	});
+}
+
+window.fbAsyncInit = function() {
+	FB.init({
+	  appId      : fbAppId,
+	  xfbml      : true,
+	  status     : true,
+	  cookie     : true,
+	  version    : fbApiVersion
+	});
+	
+	onLogin();
+
+};
+
+// pakraunamas Facebook SDK
+(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+
+function postOnWall(){
+    iApi.postOnWall({
+        message : "Labas!" },
+        function(response) {
+            if (response.success){
+                alert("Įrašas sukurtas sėkmingai");
+            } else {
+                alert("Nepavyko sukurti įrašo");
+            }
+        }
+    );
+}
+
+
+function inviteFriends(){
+    iApi.inviteFriends({message : "Prisijunk!"});
+}
+
+function getAchievements(){
+    iApi.getAchievements(
+        function(response){
+            if (response.data){
+                alert('Pasiekimų skaičius:' + response.data.length);
+            } else {
+                alert('Įvyko klaida bandant gaut pasiekimus');
+            }
+        }
+    );
+}
+
+function postAchievement(achievement){
+    iApi.postAchievement(achievement,
+        function(response) {
+            if (response.success){
+                alert("Įrašo sukūrimas pavyko sėkmingai");
+            } else {
+                alert("Nepavyko sukurti įrašo");
+            }
+        });
+}
+
+function deleteAchievement(achievement){
+    iApi.deleteAchievement(achievement,
+        function(response) {
+            if (response.success){
+                alert("Pasiekimas sėkmingai ištrintas");
+            } else {
+                alert("Nepavyko ištrinti pasiekimo");
+            }
+        });
+}
+
+function setScore(){
+    iApi.setScore(20,
+        function(response) {
+            if (response.success){
+                alert("Rezultato įrašymas pavyko");
+            } else {
+                alert("Nepavyko įrašyti rezultato");
+            }
+        });
+}
+
+function getScores(){
+    iApi.getHighScores(
+        function(response) {
+            if (response && response.data && response.data.length > 0){
+                var a = "";
+                for (var i = 0; i < response.data.length; i++) {
+                    a+= response.data[i].id + " " + response.data[i].name + " " + response.data[i].score + "\n";
+                }
+                alert(a);
+            } else {
+                alert("Nepavyko gauti rezultatų");
+            }
+        });
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:fb="http://ogp.me/ns/fb#">
+<head>
+
+	<script src="http://vk.com/js/api/xd_connection.js?2" type="text/javascript"></script>
+	<script src="/vk.js" type="text/javascript"></script>
+	<script src="/fb.js" type="text/javascript"></script>
+	<script src="/helper.js" type="text/javascript"></script>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Jūsų profilis</title>
+</head>
+<body>
+	<center>
+		<h2>Jūsų profilis:</h2>
+		<p />
+		<div id="user-info"></div>
+	</center>
+	<a href='index.html'>Grįžti į pradinį puslapį</a>
+	<br />
+
+<script language="javascript">
+
+/* iš url paimamas parametras apie tai, kokiame socialiniame tinkle esame ir sukuriamas atitinkamas objektas*/
+var args = {
+    socialNetwork : getUrlValue("key"),
+    appId : getUrlValue("appId"),
+    apiVersion : getUrlValue("apiV")
+}
+
+createApi(args, 
+    function(iApi) {
+	    /* kai jau turime tarpinį API, kviečiame jo metodus, nepriklausomai nuo to, kokiome tinkle esame */
+	    iApi.initAPI();
+	    /* funkcijos pavyzdys su papildomu parametru */
+	    iApi.getMyInfo( {
+	        photoSize : 200 },
+	        function(response) {    
+	            if (response && !response.error) {
+	                var userInfoElem = document.getElementById('user-info');
+	                userInfoElem.innerHTML = "<img src='" + response.picture + "'> <br/>"; 
+	                userInfoElem.innerHTML += response.name + "<br/>"; 
+	                userInfoElem.innerHTML += response.id;  
+	            }  
+	        });
+});
+
+
+</script>
+
+</body>
+</html>

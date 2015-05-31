@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:fb="http://ogp.me/ns/fb#">
+<head>
+
+	<script src="http://vk.com/js/api/xd_connection.js?2" type="text/javascript"></script>
+	<script src="/vk.js" type="text/javascript"></script>
+	<script src="/fb.js" type="text/javascript"></script>
+	<script src="/helper.js" type="text/javascript"></script>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Draugų informacija</title>
+</head>
+<body>
+	<center>
+		<h2>Jūsų draugų profiliai:</h2>
+		</p>
+		<div id="friend-info"></div>
+	</center>
+	<a href='index.html'>Grįžti į pradinį puslapį</a>
+	<br />
+	
+<script type="text/javascript">
+
+/* analogiškai myInfo */
+var args = {
+    socialNetwork : getUrlValue("key"),
+    appId : getUrlValue("appId"),
+    apiVersion : getUrlValue("apiV")
+}
+
+createApi(args, 
+    function(iApi) {
+		iApi.initAPI();
+		/* funkcijos pavyzdys be papildomų parametrų */
+		iApi.getFriendsInfo( {photoSize : 50}, 
+		    function(response){
+		        if (response && !response.error && response.data) {
+		            var allFriends = response.data;
+		            var tableString = "<table>";
+				    for(var i=0; i<allFriends.length; i++){
+						if(i % 2 == 0){
+						  // rodom po 2 profilius eilutėje
+						    if(i==0){
+						        // eilutės pradžia
+						        tableString = tableString + "<tr>";
+						    } else {
+						           // paskutinės eilutės pabaiga ir naujos pradžia
+						           tableString = tableString + "</tr><tr>";
+						       }
+						}
+				        // pridedam profilio nuotrauką
+				        tableString = tableString + "<td>" + "<img src='"
+				          + allFriends[i].picture + "'> <br/>";
+				       // pridedam vardą ir pavardę 
+				        tableString = tableString + allFriends[i].name + '<br/>';
+				       // pridedam id
+                        tableString = tableString + allFriends[i].id + '</td>';
+				     }
+				     tableString = tableString + '</tr></table>';
+				     var friendInfoElem = document.getElementById('friend-info');
+				     friendInfoElem.innerHTML = tableString;
+		        }
+		    }
+		);
+});
+
+</script>
+
+</body>
+</html>
